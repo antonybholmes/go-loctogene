@@ -7,6 +7,17 @@ import (
 	"github.com/antonybholmes/go-dna"
 )
 
+const WITHIN_GENE_SQL = "SELECT id, chr, start, end, strand, gene_id, gene_symbol, start - ? " +
+	"FROM genes " +
+	"WHERE level=? AND chr=? AND ((start <= ? AND end >= ?) OR (start <= ? AND end >= ?)) " +
+	"ORDER BY start ASC"
+
+const CLOSEST_GENE_SQL = "SELECT id, chr, start, end, strand, gene_id, gene_symbol, stranded_start - ? " +
+	"FROM genes " +
+	"WHERE level=? AND chr=? " +
+	"ORDER BY ABS(stranded_start - ?) " +
+	"LIMIT ?"
+
 type FeatureRecord struct {
 	Id         int    `json:"id"`
 	Chr        string `json:"chr"`
@@ -49,9 +60,7 @@ func GetLevelType(level int) string {
 func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, error) {
 	mid := (location.Start + location.End) / 2
 
-	fmt.Printf("%d", level)
-
-	rows, err := db.Query("SELECT id, chr, start, end, strand, gene_id, gene_symbol, start - ? from genes WHERE level=? AND chr=? AND ((start <= ? AND end >= ?) OR (start <= ? AND end >= ?)) ORDER BY start ASC",
+	rows, err := db.Query(WITHIN_GENE_SQL,
 		mid,
 		level,
 		location.Chr,
@@ -61,7 +70,7 @@ func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, e
 		location.End)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("there was an error with the database query")
 	}
 
 	return RowsToRecords(location, rows, level)
@@ -70,7 +79,7 @@ func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, e
 func GetClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*Features, error) {
 	mid := (location.Start + location.End) / 2
 
-	rows, err := db.Query("SELECT id, chr, start, end, strand, gene_id, gene_symbol, stranded_start - ? from genes WHERE level=? AND chr=? ORDER BY ABS(stranded_start - ?) LIMIT ?",
+	rows, err := db.Query(CLOSEST_GENE_SQL,
 		mid,
 		level,
 		location.Chr,
@@ -78,7 +87,7 @@ func GetClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*Fea
 		n)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("there was an error with the database query")
 	}
 
 	return RowsToRecords(location, rows, level)
@@ -103,7 +112,7 @@ func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features
 		err := rows.Scan(&id, &chr, &start, &end, &strand, &geneId, &geneSymbol, &d)
 
 		if err != nil {
-			fmt.Println(err)
+			return nil, fmt.Errorf("there was an error with the database records")
 		}
 
 		if strand == "-" {
