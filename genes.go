@@ -87,7 +87,7 @@ func GetClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*Fea
 		n)
 
 	if err != nil {
-		return nil, fmt.Errorf("there was an error with the database query")
+		return nil, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return RowsToRecords(location, rows, level)
