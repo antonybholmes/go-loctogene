@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/antonybholmes/go-dna"
 )
 
 func TestWithin(t *testing.T) {
@@ -20,9 +22,9 @@ func TestWithin(t *testing.T) {
 
 	defer db.Close()
 
-	location := Location{Chr: "chr3", Start: 187721370, End: 187733550}
+	location := dna.Location{Chr: "chr3", Start: 187721370, End: 187733550}
 
-	records, err := GetGenesWithin(db, &location)
+	records, err := GetGenesWithin(db, &location, 1)
 
 	if err != nil {
 		fmt.Println(err)
@@ -47,9 +49,9 @@ func TestClosest(t *testing.T) {
 
 	defer db.Close()
 
-	location := Location{Chr: "chr3", Start: 187721377, End: 187745725}
+	location := dna.Location{Chr: "chr3", Start: 187721377, End: 187745725}
 
-	records, err := GetClosestGenes(db, &location, 10)
+	records, err := GetClosestGenes(db, &location, 10, 1)
 
 	if err != nil {
 		fmt.Println(err)

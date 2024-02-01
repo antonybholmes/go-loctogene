@@ -3,13 +3,9 @@ package loctogene
 import (
 	"database/sql"
 	"fmt"
-)
 
-type Location struct {
-	Chr   string `json:"chr"`
-	Start int    `json:"start"`
-	End   int    `json:"end"`
-}
+	"github.com/antonybholmes/go-dna"
+)
 
 type FeatureRecord struct {
 	Id         int    `json:"id"`
@@ -50,7 +46,7 @@ func GetLevelType(level int) string {
 	}
 }
 
-func GetGenesWithin(db *sql.DB, location *Location, level int) (*Features, error) {
+func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, error) {
 	mid := (location.Start + location.End) / 2
 
 	fmt.Printf("%d", level)
@@ -71,7 +67,7 @@ func GetGenesWithin(db *sql.DB, location *Location, level int) (*Features, error
 	return RowsToRecords(location, rows, level)
 }
 
-func GetClosestGenes(db *sql.DB, location *Location, n int, level int) (*Features, error) {
+func GetClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*Features, error) {
 	mid := (location.Start + location.End) / 2
 
 	rows, err := db.Query("SELECT id, chr, start, end, strand, gene_id, gene_symbol, stranded_start - ? from genes WHERE level=? AND chr=? ORDER BY ABS(stranded_start - ?) LIMIT ?",
@@ -88,7 +84,7 @@ func GetClosestGenes(db *sql.DB, location *Location, n int, level int) (*Feature
 	return RowsToRecords(location, rows, level)
 }
 
-func RowsToRecords(location *Location, rows *sql.Rows, level int) (*Features, error) {
+func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features, error) {
 	defer rows.Close()
 
 	var id int
