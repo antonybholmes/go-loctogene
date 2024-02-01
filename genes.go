@@ -70,7 +70,7 @@ func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, e
 		location.End)
 
 	if err != nil {
-		return nil, fmt.Errorf("there was an error with the database query")
+		return nil, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return RowsToRecords(location, rows, level)
@@ -112,7 +112,7 @@ func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features
 		err := rows.Scan(&id, &chr, &start, &end, &strand, &geneId, &geneSymbol, &d)
 
 		if err != nil {
-			return nil, fmt.Errorf("there was an error with the database records")
+			return nil, err //fmt.Errorf("there was an error with the database records")
 		}
 
 		if strand == "-" {
