@@ -11,8 +11,7 @@ import (
 func TestWithin(t *testing.T) {
 	fmt.Println("Within")
 
-	file := fmt.Sprintf("../data/loctogene/%s_%s.db", "grch38", "gencode")
-
+	file := fmt.Sprintf("../data/loctogene/%s.db", "grch38")
 	db, err := GetDB(file)
 
 	if err != nil {
@@ -38,7 +37,7 @@ func TestWithin(t *testing.T) {
 func TestClosest(t *testing.T) {
 	fmt.Println("Closest")
 
-	file := fmt.Sprintf("/home/antony/development/loctogene/%s_%s.db", "grch38", "gencode")
+	file := fmt.Sprintf("../data/loctogene/%s.db", "grch38")
 
 	db, err := GetDB(file)
 
