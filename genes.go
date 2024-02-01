@@ -105,6 +105,7 @@ func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features
 	var geneId string
 	var geneSymbol string
 	var d int
+
 	t := GetLevelType(level)
 
 	var records = []FeatureRecord{}
