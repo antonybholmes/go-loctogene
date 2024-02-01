@@ -2,19 +2,39 @@
 #yarn update-version
 #yarn format
 
+type="fix"
+msg="Bug fixes and updates."
+branch="dev"
 
+OPTSTRING="t:m:b:"
 
-# commit
-#git add -A .
-#git commit -m "Bug fixes and updates."
-#git push -u origin dev
+while getopts ${OPTSTRING} opt
+do
+	case ${opt} in
+  	t)
+    	type=$OPTARG
+      	;;
+	m)
+    	msg=$OPTARG
+      	;;
+	b)
+      	branch=$OPTARG
+      	;;
+    ?)
+      echo "Invalid option: -${OPTARG}."
+      exit 1
+      ;;
+  esac
+done
 
-#./commit.sh
+echo "${type}: ${msg}"
+echo ${branch}
+
 
 git switch main
-git merge dev
+git merge dev -m "${type}: ${msg}"
 
 #git push -u origin main
-./commit_main.sh
+./commit.sh -t "${type}" -m "${msg}" -b main
 
 git switch dev
