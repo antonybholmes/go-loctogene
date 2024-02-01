@@ -2,7 +2,6 @@ package loctogene
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/antonybholmes/go-dna"
 )
@@ -30,10 +29,12 @@ type FeatureRecord struct {
 }
 
 type Features struct {
-	Loc      string          `json:"loc"`
+	Location string          `json:"location"`
 	Level    string          `json:"level"`
 	Features []FeatureRecord `json:"features"`
 }
+
+var ERROR_FEATURES = Features{Location: "", Level: "", Features: []FeatureRecord{}}
 
 func GetLevel(level string) int {
 	switch level {
@@ -70,7 +71,7 @@ func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, e
 		location.End)
 
 	if err != nil {
-		return nil, err //fmt.Errorf("there was an error with the database query")
+		return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return RowsToRecords(location, rows, level)
@@ -87,7 +88,7 @@ func GetClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*Fea
 		n)
 
 	if err != nil {
-		return nil, err //fmt.Errorf("there was an error with the database query")
+		return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return RowsToRecords(location, rows, level)
@@ -112,7 +113,7 @@ func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features
 		err := rows.Scan(&id, &chr, &start, &end, &strand, &geneId, &geneSymbol, &d)
 
 		if err != nil {
-			return nil, err //fmt.Errorf("there was an error with the database records")
+			return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database records")
 		}
 
 		if strand == "-" {
@@ -124,5 +125,5 @@ func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features
 		records = append(records, FeatureRecord{Id: id, Chr: chr, Start: start, End: end, Strand: strand, GeneId: geneId, GeneSymbol: geneSymbol, Dist: d})
 	}
 
-	return &Features{Loc: fmt.Sprintf("%s:%d-%d", location.Chr, location.Start, location.End), Level: t, Features: records}, nil
+	return &Features{Location: location.String(), Level: t, Features: records}, nil
 }
