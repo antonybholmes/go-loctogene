@@ -11,7 +11,7 @@ import (
 func TestWithin(t *testing.T) {
 	fmt.Println("Within")
 
-	file := fmt.Sprintf("/home/antony/development/loctogene/%s_%s.db", "grch38", "gencode")
+	file := fmt.Sprintf("../data/loctogene/%s_%s.db", "grch38", "gencode")
 
 	db, err := GetDB(file)
 
