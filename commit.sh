@@ -1,17 +1,32 @@
-msg=$1
-type=$2
+type="fix"
+msg="Bug fixes and updates."
+branch="dev"
 
-if [[ -z "${msg}" ]]
-then
-	mgs="fix: Bug fixes and updates."
-fi
+OPTSTRING="t:m:b:"
 
-if [[ -z "${type}" ]]
-then
-	type="fix"
-fi
+while getopts ${OPTSTRING} opt
+do
+	case ${opt} in
+  	t)
+    	type=$OPTARG
+      	;;
+	m)
+    	msg=$OPTARG
+      	;;
+	b)
+      	branch=$OPTARG
+      	;;
+    ?)
+      echo "Invalid option: -${OPTARG}."
+      exit 1
+      ;;
+  esac
+done
+
+echo "${type}: ${msg}"
+echo ${branch}
 
 # commit
 git add -A .
 git commit -m "${type}: ${msg}"
-git push -u origin dev
+git push -u origin ${branch}
