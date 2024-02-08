@@ -12,7 +12,7 @@ func TestWithin(t *testing.T) {
 	fmt.Println("Within")
 
 	file := fmt.Sprintf("../data/loctogene/%s.db", "grch38")
-	db, err := GetDB(file)
+	db, err := NewLoctogeneDB(file)
 
 	if err != nil {
 		fmt.Println(err)
@@ -21,9 +21,9 @@ func TestWithin(t *testing.T) {
 
 	defer db.Close()
 
-	location := dna.Location{Chr: "chr3", Start: 187721370, End: 187733550}
+	location := dna.NewLocation("chr3", 187721370, 187733550)
 
-	records, err := GetGenesWithin(db, &location, 1)
+	records, err := db.WithinGenes(location, Gene)
 
 	if err != nil {
 		fmt.Println(err)
@@ -39,7 +39,7 @@ func TestClosest(t *testing.T) {
 
 	file := fmt.Sprintf("../data/loctogene/%s.db", "grch38")
 
-	db, err := GetDB(file)
+	db, err := NewLoctogeneDB(file)
 
 	if err != nil {
 		fmt.Println(err)
@@ -48,9 +48,9 @@ func TestClosest(t *testing.T) {
 
 	defer db.Close()
 
-	location := dna.Location{Chr: "chr3", Start: 187721377, End: 187745725}
+	location := dna.NewLocation("chr3", 187721377, 187745725)
 
-	records, err := GetClosestGenes(db, &location, 10, 1)
+	records, err := db.ClosestGenes(location, 10, 1)
 
 	if err != nil {
 		fmt.Println(err)
