@@ -17,7 +17,7 @@ const CLOSEST_GENE_SQL = "SELECT id, chr, start, end, strand, gene_id, gene_symb
 	"ORDER BY ABS(stranded_start - ?) " +
 	"LIMIT ?"
 
-type FeatureRecord struct {
+type GenomicFeature struct {
 	Id         int    `json:"id"`
 	Chr        string `json:"chr"`
 	Start      int    `json:"start"`
@@ -28,13 +28,13 @@ type FeatureRecord struct {
 	Dist       int    `json:"d"`
 }
 
-type Features struct {
-	Location string          `json:"location"`
-	Level    string          `json:"level"`
-	Features []FeatureRecord `json:"features"`
+type GenomicFeatures struct {
+	Location string           `json:"location"`
+	Level    string           `json:"level"`
+	Features []GenomicFeature `json:"features"`
 }
 
-var ERROR_FEATURES = Features{Location: "", Level: "", Features: []FeatureRecord{}}
+var ERROR_FEATURES = GenomicFeatures{Location: "", Level: "", Features: []GenomicFeature{}}
 
 func GetLevel(level string) int {
 	switch level {
@@ -58,7 +58,7 @@ func GetLevelType(level int) string {
 	}
 }
 
-func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, error) {
+func GenesWithin(db *sql.DB, location *dna.Location, level int) (*GenomicFeatures, error) {
 	mid := (location.Start + location.End) / 2
 
 	rows, err := db.Query(WITHIN_GENE_SQL,
@@ -77,7 +77,7 @@ func GetGenesWithin(db *sql.DB, location *dna.Location, level int) (*Features, e
 	return RowsToRecords(location, rows, level)
 }
 
-func GetClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*Features, error) {
+func ClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*GenomicFeatures, error) {
 	mid := (location.Start + location.End) / 2
 
 	rows, err := db.Query(CLOSEST_GENE_SQL,
@@ -94,7 +94,7 @@ func GetClosestGenes(db *sql.DB, location *dna.Location, n int, level int) (*Fea
 	return RowsToRecords(location, rows, level)
 }
 
-func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features, error) {
+func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*GenomicFeatures, error) {
 	defer rows.Close()
 
 	var id int
@@ -108,7 +108,7 @@ func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features
 
 	t := GetLevelType(level)
 
-	var records = []FeatureRecord{}
+	var records = []GenomicFeature{}
 
 	for rows.Next() {
 		err := rows.Scan(&id, &chr, &start, &end, &strand, &geneId, &geneSymbol, &d)
@@ -123,8 +123,8 @@ func RowsToRecords(location *dna.Location, rows *sql.Rows, level int) (*Features
 			end = t
 		}
 
-		records = append(records, FeatureRecord{Id: id, Chr: chr, Start: start, End: end, Strand: strand, GeneId: geneId, GeneSymbol: geneSymbol, Dist: d})
+		records = append(records, GenomicFeature{Id: id, Chr: chr, Start: start, End: end, Strand: strand, GeneId: geneId, GeneSymbol: geneSymbol, Dist: d})
 	}
 
-	return &Features{Location: location.String(), Level: t, Features: records}, nil
+	return &GenomicFeatures{Location: location.String(), Level: t, Features: records}, nil
 }
