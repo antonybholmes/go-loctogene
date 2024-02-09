@@ -45,6 +45,22 @@ type GenomicFeature struct {
 	Dist       int    `json:"d"`
 }
 
+func (feature *GenomicFeature) ToLocation() *dna.Location {
+	return dna.NewLocation(feature.Chr, feature.Start, feature.End)
+}
+
+func (feature *GenomicFeature) TSS() *dna.Location {
+	var s uint
+
+	if feature.Strand == "+" {
+		s = feature.Start
+	} else {
+		s = feature.End
+	}
+
+	return dna.NewLocation(feature.Chr, s, s)
+}
+
 type GenomicFeatures struct {
 	Location string           `json:"location"`
 	Level    string           `json:"level"`
@@ -256,12 +272,6 @@ func rowsToRecords(location *dna.Location, rows *sql.Rows, level Level) (*Genomi
 
 		if err != nil {
 			return nil, err //fmt.Errorf("there was an error with the database records")
-		}
-
-		if strand == "-" {
-			t := start
-			start = end
-			end = t
 		}
 
 		features = append(features, GenomicFeature{Id: id, Chr: chr, Start: start, End: end, Strand: strand, GeneId: geneId, GeneSymbol: geneSymbol, Dist: d})
