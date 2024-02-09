@@ -2,6 +2,8 @@ package loctogene
 
 import (
 	"database/sql"
+	"fmt"
+	"path/filepath"
 
 	"github.com/antonybholmes/go-dna"
 )
@@ -81,7 +83,38 @@ func (level Level) String() string {
 	}
 }
 
-type LoctogeneDB struct {
+type LoctogeneDbCache struct {
+	dir   string
+	cache map[string]*LoctogeneDb
+}
+
+func NewLoctogeneDbCache(dir string) *LoctogeneDbCache {
+	return &LoctogeneDbCache{dir: dir, cache: make(map[string]*LoctogeneDb)}
+}
+
+func (loctogenedbcache *LoctogeneDbCache) Db(assembly string) (*LoctogeneDb, error) {
+	_, ok := loctogenedbcache.cache[assembly]
+
+	if !ok {
+		db, err := NewLoctogeneDb(filepath.Join(loctogenedbcache.dir, fmt.Sprintf("%s.db", assembly)))
+
+		if err != nil {
+			return nil, err
+		}
+
+		loctogenedbcache.cache[assembly] = db
+	}
+
+	return loctogenedbcache.cache[assembly], nil
+}
+
+func (loctogenedbcache *LoctogeneDbCache) Close() {
+	for _, db := range loctogenedbcache.cache {
+		db.Close()
+	}
+}
+
+type LoctogeneDb struct {
 	db                    *sql.DB
 	withinGeneStmt        *sql.Stmt
 	withinGeneAndPromStmt *sql.Stmt
@@ -89,7 +122,7 @@ type LoctogeneDB struct {
 	closestGeneStmt       *sql.Stmt
 }
 
-func NewLoctogeneDB(file string) (*LoctogeneDB, error) {
+func NewLoctogeneDb(file string) (*LoctogeneDb, error) {
 	db, err := sql.Open("sqlite3", file)
 
 	if err != nil {
@@ -120,14 +153,14 @@ func NewLoctogeneDB(file string) (*LoctogeneDB, error) {
 		return nil, err
 	}
 
-	return &LoctogeneDB{db, withinGeneStmt, withinGeneAndPromStmt, inExonStmt, closestGeneStmt}, nil
+	return &LoctogeneDb{db, withinGeneStmt, withinGeneAndPromStmt, inExonStmt, closestGeneStmt}, nil
 }
 
-func (loctogenedb *LoctogeneDB) Close() {
+func (loctogenedb *LoctogeneDb) Close() {
 	loctogenedb.db.Close()
 }
 
-func (loctogenedb *LoctogeneDB) WithinGenes(location *dna.Location, level Level) (*GenomicFeatures, error) {
+func (loctogenedb *LoctogeneDb) WithinGenes(location *dna.Location, level Level) (*GenomicFeatures, error) {
 	mid := (location.Start + location.End) / 2
 
 	rows, err := loctogenedb.withinGeneStmt.Query(
@@ -146,7 +179,7 @@ func (loctogenedb *LoctogeneDB) WithinGenes(location *dna.Location, level Level)
 	return rowsToRecords(location, rows, level)
 }
 
-func (loctogenedb *LoctogeneDB) WithinGenesAndPromoter(location *dna.Location, level Level, pad uint) (*GenomicFeatures, error) {
+func (loctogenedb *LoctogeneDb) WithinGenesAndPromoter(location *dna.Location, level Level, pad uint) (*GenomicFeatures, error) {
 	mid := (location.Start + location.End) / 2
 
 	rows, err := loctogenedb.withinGeneAndPromStmt.Query(
@@ -169,7 +202,7 @@ func (loctogenedb *LoctogeneDB) WithinGenesAndPromoter(location *dna.Location, l
 	return rowsToRecords(location, rows, level)
 }
 
-func (loctogenedb *LoctogeneDB) InExon(location *dna.Location, geneId string) (*GenomicFeatures, error) {
+func (loctogenedb *LoctogeneDb) InExon(location *dna.Location, geneId string) (*GenomicFeatures, error) {
 	mid := (location.Start + location.End) / 2
 
 	rows, err := loctogenedb.inExonStmt.Query(
@@ -188,7 +221,7 @@ func (loctogenedb *LoctogeneDB) InExon(location *dna.Location, geneId string) (*
 	return rowsToRecords(location, rows, Exon)
 }
 
-func (loctogenedb *LoctogeneDB) ClosestGenes(location *dna.Location, n uint16, level Level) (*GenomicFeatures, error) {
+func (loctogenedb *LoctogeneDb) ClosestGenes(location *dna.Location, n uint16, level Level) (*GenomicFeatures, error) {
 	mid := (location.Start + location.End) / 2
 
 	rows, err := loctogenedb.closestGeneStmt.Query(mid,
