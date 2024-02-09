@@ -2,7 +2,6 @@ package loctogene
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/antonybholmes/go-dna"
 )
@@ -91,8 +90,6 @@ type LoctogeneDB struct {
 }
 
 func NewLoctogeneDB(file string) (*LoctogeneDB, error) {
-	fmt.Printf("Opening db %s...\n", file)
-
 	db, err := sql.Open("sqlite3", file)
 
 	if err != nil {
@@ -143,7 +140,7 @@ func (loctogenedb *LoctogeneDB) WithinGenes(location *dna.Location, level Level)
 		location.End)
 
 	if err != nil {
-		return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database query")
+		return nil, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return rowsToRecords(location, rows, level)
@@ -166,7 +163,7 @@ func (loctogenedb *LoctogeneDB) WithinGenesAndPromoter(location *dna.Location, l
 		location.End)
 
 	if err != nil {
-		return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database query")
+		return nil, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return rowsToRecords(location, rows, level)
@@ -185,7 +182,7 @@ func (loctogenedb *LoctogeneDB) InExon(location *dna.Location, geneId string) (*
 		location.End)
 
 	if err != nil {
-		return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database query")
+		return nil, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return rowsToRecords(location, rows, Exon)
@@ -194,15 +191,14 @@ func (loctogenedb *LoctogeneDB) InExon(location *dna.Location, geneId string) (*
 func (loctogenedb *LoctogeneDB) ClosestGenes(location *dna.Location, n uint16, level Level) (*GenomicFeatures, error) {
 	mid := (location.Start + location.End) / 2
 
-	rows, err := loctogenedb.closestGeneStmt.Query(CLOSEST_GENE_SQL,
-		mid,
+	rows, err := loctogenedb.closestGeneStmt.Query(mid,
 		level,
 		location.Chr,
 		mid,
 		n)
 
 	if err != nil {
-		return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database query")
+		return nil, err //fmt.Errorf("there was an error with the database query")
 	}
 
 	return rowsToRecords(location, rows, level)
@@ -226,7 +222,7 @@ func rowsToRecords(location *dna.Location, rows *sql.Rows, level Level) (*Genomi
 		err := rows.Scan(&id, &chr, &start, &end, &strand, &geneId, &geneSymbol, &d)
 
 		if err != nil {
-			return &ERROR_FEATURES, err //fmt.Errorf("there was an error with the database records")
+			return nil, err //fmt.Errorf("there was an error with the database records")
 		}
 
 		if strand == "-" {

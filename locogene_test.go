@@ -50,11 +50,7 @@ func TestClosest(t *testing.T) {
 
 	location := dna.NewLocation("chr3", 187721377, 187745725)
 
-<<<<<<< HEAD
-	records, err := ClosestGenes(db, &location, 10, 1)
-=======
 	records, err := db.ClosestGenes(location, 10, 1)
->>>>>>> dev
 
 	if err != nil {
 		fmt.Println(err)
