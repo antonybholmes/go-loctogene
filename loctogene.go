@@ -13,7 +13,7 @@ const WITHIN_GENE_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbo
 
 const CLOSEST_GENE_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbol, stranded_start - ?
  FROM genes
- WHERE level=? AND chr=?
+ WHERE level = ? AND chr = ?
  ORDER BY ABS(stranded_start - ?)
  LIMIT ?`
 
@@ -54,16 +54,16 @@ var ERROR_FEATURES = GenomicFeatures{Location: "", Level: "", Features: []Genomi
 type Level int
 
 const (
-	Gene Level = iota
-	Transcript
-	Exon
+	Gene       Level = 1
+	Transcript Level = 2
+	Exon       Level = 3
 )
 
 func ParseLevel(level string) Level {
 	switch level {
-	case "transcript", "2":
+	case "t", "transcript", "2":
 		return Transcript
-	case "exon", "3":
+	case "e", "exon", "3":
 		return Exon
 	default:
 		return Gene
