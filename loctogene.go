@@ -40,9 +40,9 @@ type GenomicFeature struct {
 	Start      uint   `json:"start"`
 	End        uint   `json:"end"`
 	Strand     string `json:"strand"`
-	GeneId     string `json:"gene_id"`
-	GeneSymbol string `json:"gene_symbol"`
-	Dist       int    `json:"d"`
+	GeneId     string `json:"geneId"`
+	GeneSymbol string `json:"geneSymbol"`
+	TssDist    int    `json:"tssDist"`
 }
 
 func (feature *GenomicFeature) ToLocation() *dna.Location {
@@ -274,7 +274,7 @@ func rowsToRecords(location *dna.Location, rows *sql.Rows, level Level) (*Genomi
 			return nil, err //fmt.Errorf("there was an error with the database records")
 		}
 
-		features = append(features, GenomicFeature{Id: id, Chr: chr, Start: start, End: end, Strand: strand, GeneId: geneId, GeneSymbol: geneSymbol, Dist: d})
+		features = append(features, GenomicFeature{Id: id, Chr: chr, Start: start, End: end, Strand: strand, GeneId: geneId, GeneSymbol: geneSymbol, TssDist: d})
 	}
 
 	return &GenomicFeatures{Location: location.String(), Level: level.String(), Features: features}, nil
