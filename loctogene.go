@@ -8,18 +8,18 @@ import (
 	"github.com/antonybholmes/go-dna"
 )
 
-const WITHIN_GENE_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbol, start - ?
+const WITHIN_GENE_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbol, ? - stranded_start
  FROM genes
  WHERE level=? AND chr=? AND ((start <= ? AND end >= ?) OR (start <= ? AND end >= ?))
  ORDER BY start ASC`
 
-const CLOSEST_GENE_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbol, stranded_start - ?
+const CLOSEST_GENE_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbol, ? - stranded_start
  FROM genes
  WHERE level = ? AND chr = ?
  ORDER BY ABS(stranded_start - ?)
  LIMIT ?`
 
-const WITHIN_GENE_AND_PROMOTER_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbol, start - ? 
+const WITHIN_GENE_AND_PROMOTER_SQL = `SELECT id, chr, start, end, strand, gene_id, gene_symbol, ? - stranded_start 
  FROM genes 
  WHERE level = ? AND chr = ? AND ((start - ? <= ? AND end + ? >= ?) OR (start - ? <= ? AND end + ? >= ?)) 
  ORDER BY start ASC`
