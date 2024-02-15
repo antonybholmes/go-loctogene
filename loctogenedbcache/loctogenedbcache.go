@@ -6,9 +6,9 @@ import (
 
 var Cache = loctogene.NewLoctogeneDbCache()
 
-func Dir(dir string) *loctogene.LoctogeneDbCache {
+func Dir(dir string) {
 	Cache.Dir(dir)
-	return Cache
+
 }
 func Db(assembly string) (*loctogene.LoctogeneDb, error) {
 	return Cache.Db(assembly)

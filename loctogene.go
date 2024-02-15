@@ -108,9 +108,8 @@ func NewLoctogeneDbCache() *LoctogeneDbCache {
 	return &LoctogeneDbCache{dir: ".", cache: make(map[string]*LoctogeneDb)}
 }
 
-func (loctogenedbcache *LoctogeneDbCache) Dir(dir string) *LoctogeneDbCache {
+func (loctogenedbcache *LoctogeneDbCache) Dir(dir string) {
 	loctogenedbcache.dir = dir
-	return loctogenedbcache
 }
 
 func (loctogenedbcache *LoctogeneDbCache) Db(assembly string) (*LoctogeneDb, error) {
