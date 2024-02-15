@@ -104,8 +104,13 @@ type LoctogeneDbCache struct {
 	cache map[string]*LoctogeneDb
 }
 
-func NewLoctogeneDbCache(dir string) *LoctogeneDbCache {
-	return &LoctogeneDbCache{dir: dir, cache: make(map[string]*LoctogeneDb)}
+func NewLoctogeneDbCache() *LoctogeneDbCache {
+	return &LoctogeneDbCache{dir: ".", cache: make(map[string]*LoctogeneDb)}
+}
+
+func (loctogenedbcache *LoctogeneDbCache) Dir(dir string) *LoctogeneDbCache {
+	loctogenedbcache.dir = dir
+	return loctogenedbcache
 }
 
 func (loctogenedbcache *LoctogeneDbCache) Db(assembly string) (*LoctogeneDb, error) {
